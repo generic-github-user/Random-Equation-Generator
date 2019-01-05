@@ -1,0 +1,313 @@
+<html>
+	<head>
+		<title>Random Equation Generator</title>
+	</head>
+	<body>
+		<h1 id="equation">
+			<!-- Add placeholder -->
+            </h1>
+		<button onclick="generate();">
+			Generate random equation
+		</button>
+		<textarea id="output">
+
+		</textarea>
+		<input type="range" min="0" max="100" value="50" id="equations-size-slider" onload="updateSettings();" oninput="updateSettings();"></input>
+		<p id="equation-size-label">0.50</p>
+
+		<input type="range" min="0" max="99" value="75" id="symbol-number-ratio-slider" onload="updateSettings();" oninput="updateSettings();"></input>
+		<p id="symbol-number-ratio-label">0.75</p>
+
+		<input type="range" min="0" max="99" value="50" id="integer-decimal-ratio-slider" onload="updateSettings();" oninput="updateSettings();"></input>
+		<p id="integer-decimal-ratio-label">0.75</p>
+
+		<script type="text/javascript">
+		//Latex view
+		//open-closed operators
+			// Mathematical terms that stand alone in an equation line
+			const terms = {
+				// "Open" terms that can (will be) filled with more terms and operators, increasing the size of the equation
+				open: [
+					// Square roots
+						"\\sqrt{}",
+						"\\sqrt{}",
+						"\\sqrt{}",
+					// Calculus
+						//Integrals
+							"\\int_{}^{} {}",
+							"\\iint_{}^{} {}",
+							"\\iiint_{}^{} {}",
+							"\\iiiint_{}^{} {}",
+							"\\idotsint_{}^{} {}",
+							"\\oint_{} {}",
+							//"\\oiint_{}",
+							//"\\sum_{n=1}^{\\infty} {}",
+							//"\\prod_{}^{} {}",
+							"\\lim_{} {}",
+							"\\lim_{} {}",
+
+
+						//"\\underbracket{}^{}",
+						//"\\overbracket{}^{}",
+						//"\\underbrace{}^{}",
+						//"\\overbrace{}^{}",
+					// Fraction (division)
+						"({{} \\over {}})",
+						"[{{} \\over {}}]",
+						"[{{} \\over {}}]",
+						"\\{{{} \\over {}}\\{",
+						"\\{{{} \\over {}}\\{",
+					// Grouping
+						// Parentheses
+							"({})",
+							"({})",
+							"({})",
+						// Brackets
+							"[{}]",
+							"[{}]",
+							"[{}]",
+						// Braces (visible braces escaped)
+							"\\{{}\\}",
+							"\\{{}\\}",
+							"\\{{}\\}"
+				],
+				// "Closed" terms that cannot be nested inside one another like open terms can be
+				closed: [
+					// English/Latin alphabet (also includes versions of some mathematical constants, such as Euler's number [e] and the imaginary unit [i])
+						// Lowercase
+							"a",
+							"b",
+							"c",
+							"d",
+							"e",
+							"f",
+							"g",
+							"h",
+							"i",
+							"j",
+							"k",
+							"l",
+							"m",
+							"n",
+							"o",
+							"p",
+							"q",
+							"r",
+							"s",
+							"t",
+							"u",
+							"v",
+							"w",
+							"x",
+							"y",
+							"z",
+						// Uppercase
+							"A",
+							"B",
+							"C",
+							"D",
+							"E",
+							"F",
+							"G",
+							"H",
+							"I",
+							"J",
+							"K",
+							"L",
+							"M",
+							"N",
+							"O",
+							"P",
+							"Q",
+							"R",
+							"S",
+							"T",
+							"U",
+							"V",
+							"W",
+							"X",
+							"Y",
+							"Z",
+					// Greek alphabet
+						// Lowercase
+						"\\alpha",
+						"\\beta",
+						"\\gamma",
+						"\\delta",
+						"\\epsilon",
+						"\\varepsilon",
+						"\\zeta",
+						"\\eta",
+						"\\theta",
+						"\\vartheta",
+						"\\iota",
+						"\\kappa",
+						"\\lambda",
+						"\\mu",
+						"\\nu",
+						"\\xi",
+						"o", //
+						"\\pi",
+						"\\varpi",
+						"\\rho",
+						"\\varrho",
+						"\\sigma",
+						"\\varsigma",
+						"\\tau",
+						"\\upsilon",
+						"\\phi",
+						"\\varphi",
+						"\\chi",
+						"\\psi",
+						"\\omega",
+						// Uppercase
+						//"\\Alpha",
+						//"\\Beta",
+						"\\Gamma",
+						"\\Delta",
+						//"\\Kappa",
+						"\\Lambda",
+						//"\\Mu",
+						//"\\Nu",
+						"\\Xi",
+						"O", //
+						"\\Pi",
+						//"\\Varpi",
+						//"\\Rho",
+						//"\\Varrho",
+						"\\Sigma",
+						//"\\Varsigma",
+						//"\\Tau",
+						"\\Upsilon",
+						"\\Phi",
+						//"\\Varphi",
+						//"\\Chi",
+						"\\Psi",
+						"\\Omega"
+				]
+			};
+			// Mathematical operators to be placed in between two terms in an equation line
+			const operators = {
+				open: [//merge
+					"^ {}",
+					"_ {}"
+				],
+				closed: [
+					"+",
+					"-",
+					"\\pm",
+					"\\mp",
+					"\\times",
+					"\\cdot",
+					"/",
+					"\\div",
+					"\\cap",
+					"\\cup",
+					"\\uplus",
+					"\\sqcap",
+					"\\sqcup",
+					"\\vee",
+					"\\wedge",
+					"\\setminus",
+					"\\wr"
+				]
+			};
+
+			// Returns a random item from a given array
+			function random(array) {
+				return array[Math.floor(Math.random() * array.length)]
+			}
+			function updateSettings() {
+				window.equationSize = (document.getElementById("equations-size-slider").value / 100).toFixed(2);
+				document.getElementById("equation-size-label").innerText = window.equationSize;
+
+				window.symbolNumberRatio = (document.getElementById("symbol-number-ratio-slider").value / 100).toFixed(2);
+				document.getElementById("symbol-number-ratio-label").innerText = window.symbolNumberRatio;
+
+				window.window.integerDecimalRatio = (document.getElementById("integer-decimal-ratio-slider").value / 100).toFixed(2);
+				document.getElementById("integer-decimal-ratio-label").innerText = window.window.integerDecimalRatio;
+			}
+			function addTerms(ratio) {
+				var output = "";
+
+				var length = Math.ceil(Math.random() * 2) + 1;//numtermadj
+				var ratio;
+				for (var i = 0; i < length; i ++) {
+
+					ratio = equation.length * (1 - window.equationSize);
+					//ratio = 0.8;
+
+					if (Math.random() < ratio) {
+						output += random(terms.open);
+					}
+					else {
+						// Use a variable or symbol from terms.closed
+						if (Math.random() < window.symbolNumberRatio) {
+							output += random(terms.closed);
+						}
+						// Use a number
+						else {
+							// Use an integer (no decimal places)
+							if (Math.random() < window.integerDecimalRatio) {
+								output += Math.floor(Math.random() * 25) + 2;
+							}
+							// Use decimal places
+							else {
+								// Set a random number of decimal places to round to, from 1 to 4
+								var decimalPlaces = Math.floor(Math.random() * 4) + 1;
+								// Round random number to pre-determined number of decimal places
+								output += Math.round((Math.random() * 25) * (10 ** decimalPlaces)) / (10 ** decimalPlaces);
+							}
+						}
+					}
+
+					// Add operator after each term, but not after the last term
+					if (i < (length - 1)) {
+						if (Math.random() > ratio) {
+							output += " " + random(operators.open) + " ";
+						}
+						else {
+							output += " " + random(operators.closed) + " ";
+						}
+					}
+				}
+
+				// Return equation line as function output
+				return output;
+			}
+			// Generate equation
+			function generate() {
+				// Open equation with "$$" syntax
+				equation = "$$";
+				// Add first level of terms (no open terms are filled in yet)
+				equation += addTerms();
+				// Close equation
+				equation += "$$";
+
+				for (var i = 0; i < equation.length; i ++) {
+					if (equation.slice(i, (i + 2)) == "{}") {
+						var start = equation.slice(0, (i + 1));
+						var end = equation.slice((i + 1), equation.length);
+
+						equation = start;
+						equation += addTerms();
+						equation += end;
+					}
+				}
+
+				// Replace inner text of "equation" h1 element with generated equation string
+				document.getElementById("equation").innerText = equation;
+				document.getElementById("output").value = equation;
+				// Rerender equation with MathJax after it is fully generated
+				MathJax.Hub.Typeset();
+				console.log("Equation generated: " + equation);
+			}
+
+
+//true random numbers (trurand)
+// populates
+//fix error
+		</script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"></script>
+	</body>
+</html>

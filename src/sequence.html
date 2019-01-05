@@ -1,0 +1,29 @@
+<html>
+	<head>
+		<title>Sequence</title>
+	</head>
+	<body>
+		<h1 id="equation">
+			<!-- Add placeholder -->
+            </h1>
+		<button onclick="generate();">
+			Generate random equation
+		</button>
+		<textarea id="output">
+
+		</textarea>
+		<input type="range" min="0" max="100" value="50" id="equations-size-slider" onload="updateSettings();" oninput="updateSettings();"></input>
+		<p id="equation-size-label">0.50</p>
+
+		<input type="range" min="0" max="99" value="75" id="symbol-number-ratio-slider" onload="updateSettings();" oninput="updateSettings();"></input>
+		<p id="symbol-number-ratio-label">0.75</p>
+
+		<input type="range" min="0" max="99" value="50" id="integer-decimal-ratio-slider" onload="updateSettings();" oninput="updateSettings();"></input>
+		<p id="integer-decimal-ratio-label">0.75</p>
+
+		<script type="text/javascript">
+
+		</script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"></script>
+	</body>
+</html>
